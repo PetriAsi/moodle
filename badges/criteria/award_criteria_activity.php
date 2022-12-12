@@ -40,6 +40,10 @@ class award_criteria_activity extends award_criteria {
     private $course;
 
     public $required_param = 'module';
+    /**
+     * Any additional configuration  parameters.
+     * @var optional_params
+     */
     public $optional_params = array('bydate');
 
     public function __construct($record) {
@@ -188,7 +192,8 @@ class award_criteria_activity extends award_criteria {
      * @return bool Whether criteria is complete
      */
     public function review($userid, $filtered = false) {
-        $completionstates = array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS, COMPLETION_COMPLETE_FAIL);
+        // Award just successfull completions.
+        $completionstates = array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS);
 
         if ($this->course->startdate > time()) {
             return false;
