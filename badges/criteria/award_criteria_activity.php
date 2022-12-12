@@ -40,7 +40,11 @@ class award_criteria_activity extends award_criteria {
     private $course;
 
     public $required_param = 'module';
-    public $optional_params = array('bydate');
+    /**
+     * Any additional configuration  parameters.
+     * @var optional_params
+     */
+    public $optional_params = array('bydate', 'passed');
 
     public function __construct($record) {
         global $DB;
@@ -94,6 +98,9 @@ class award_criteria_activity extends award_criteria {
                 $str = html_writer::tag('b', '"' . get_string('modulename', $mod->modname) . ' - ' . $mod->name . '"');
                 if (isset($p['bydate'])) {
                     $str .= get_string('criteria_descr_bydate', 'badges', userdate($p['bydate'], get_string('strftimedate', 'core_langconfig')));
+                }
+                if (isset($p['passed'])) {
+                    $str .= get_string('criteria_descr_passed', 'badges');
                 }
             }
             $output[] = $str;
@@ -156,6 +163,10 @@ class award_criteria_activity extends award_criteria {
                     $param['grade'] = $this->params[$mod->id]['grade'];
                 }
 
+                if ($this->id !== 0 && isset($this->params[$mod->id]['passed'])) {
+                    $param['passed'] = $this->params[$mod->id]['passed'];
+                }
+
                 $this->config_options($mform, $param);
                 $none = false;
             }
@@ -188,8 +199,6 @@ class award_criteria_activity extends award_criteria {
      * @return bool Whether criteria is complete
      */
     public function review($userid, $filtered = false) {
-        $completionstates = array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS, COMPLETION_COMPLETE_FAIL);
-
         if ($this->course->startdate > time()) {
             return false;
         }
@@ -203,6 +212,13 @@ class award_criteria_activity extends award_criteria {
 
             $data = $info->get_data($cm, false, $userid);
             $check_date = true;
+
+            if (isset($param['passed']) && $param['passed'] ) {
+                // Do not count failed completions if passed completions are required.
+                $completionstates = array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS);
+            } else {
+                $completionstates = array(COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS, COMPLETION_COMPLETE_FAIL);
+            }
 
             if (isset($param['bydate'])) {
                 $date = $data->timemodified;
