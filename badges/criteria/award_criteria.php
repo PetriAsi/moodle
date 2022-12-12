@@ -205,12 +205,18 @@ abstract class award_criteria {
         } else {
             $parameter[] =& $mform->createElement('advcheckbox', $prefix . $param['id'], '', $param['name'], null, array(0, $param['id']));
             $parameter[] =& $mform->createElement('static', 'break_start_' . $param['id'], null,
-                '<div class="ml-3 mt-1 w-100 align-items-center">');
+                '<div class="ml-3 mt-1 w-100 align-items-left">');
 
             if (in_array('grade', $this->optional_params)) {
                 $parameter[] =& $mform->createElement('static', 'mgrade_' . $param['id'], null, get_string('mingrade', 'badges'));
                 $parameter[] =& $mform->createElement('text', 'grade_' . $param['id'], '', array('size' => '5'));
                 $mform->setType('grade_' . $param['id'], PARAM_INT);
+            }
+
+            if (in_array('passed', $this->optional_params)) {
+                $parameter[] =& $mform->createElement('advcheckbox', 'passed_' . $param['id'],
+                    get_string('passedgrade', 'badges'),  null, array(0, 1));
+                $mform->setType('passed_' . $param['id'], PARAM_INT);
             }
 
             if (in_array('bydate', $this->optional_params)) {
@@ -237,6 +243,9 @@ abstract class award_criteria {
         }
         if (isset($param['grade'])) {
             $mform->setDefault('grade_' . $param['id'], $param['grade']);
+        }
+        if (isset($param['passed'])) {
+            $mform->setDefault('passed_' . $param['id'], $param['passed']);
         }
     }
 
